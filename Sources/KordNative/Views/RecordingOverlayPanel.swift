@@ -1,5 +1,8 @@
 import AppKit
 import SwiftUI
+import os.log
+
+private let overlayLog = Logger(subsystem: "com.labgarge.kord", category: "Overlay")
 
 /// A transparent, borderless, always-on-top panel for the recording overlay.
 /// Non-activating so it doesn't steal focus from the app being dictated into.
@@ -56,6 +59,11 @@ final class RecordingOverlayPanel {
     }
 
     /// Install a CGEvent tap to intercept Enter/Escape system-wide.
+    ///
+    /// This uses `.cgSessionEventTap` to intercept ALL keyDown events because the overlay
+    /// panel is non-activating (`.nonactivatingPanel`) and therefore cannot become the key
+    /// window. Only Return (keyCode 36) and Escape (keyCode 53) are consumed; all other
+    /// keys pass through unmodified. The tap is removed when the overlay is hidden.
     func makeKeyable() {
         guard eventTap == nil else { return }
 
@@ -95,10 +103,14 @@ final class RecordingOverlayPanel {
         )
 
         guard let tap = eventTap else {
-            print("[RecordingOverlayPanel] ERROR: CGEvent.tapCreate returned nil — Accessibility permission not granted. Add this app in System Settings > Privacy & Security > Accessibility.")
+            overlayLog.error("CGEvent.tapCreate returned nil — Accessibility permission not granted")
+            // Notify the user that keyboard shortcuts won't work
+            DispatchQueue.main.async {
+                self.recordingManager.accessibilityDenied = true
+            }
             return
         }
-        print("[RecordingOverlayPanel] Event tap installed for Enter/Escape interception")
+        overlayLog.info("Event tap installed for Enter/Escape interception")
 
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
         CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)

@@ -7,7 +7,13 @@ pub unsafe fn c_str_to_str<'a>(ptr: *const c_char) -> Option<&'a str> {
     if ptr.is_null() {
         return None;
     }
-    CStr::from_ptr(ptr).to_str().ok()
+    match CStr::from_ptr(ptr).to_str() {
+        Ok(s) => Some(s),
+        Err(e) => {
+            log::warn!("FFI received invalid UTF-8 string: {}", e);
+            None
+        }
+    }
 }
 
 /// Convert a Rust string to a heap-allocated C string.

@@ -1,5 +1,8 @@
 import Foundation
 import CKordCore
+import os.log
+
+private let kordLog = Logger(subsystem: "com.labgarge.kord", category: "FFI")
 
 /// Swift wrapper around the Rust kord-core C FFI.
 /// All complex types are exchanged as JSON strings over the C boundary.
@@ -36,7 +39,11 @@ final class KordCore {
     /// Read a C string returned by Rust, convert to Swift String, then free it.
     private func consumeRustString(_ ptr: UnsafeMutablePointer<CChar>?) -> String? {
         guard let ptr = ptr else { return nil }
-        let str = String(cString: ptr)
+        guard let str = String(validatingUTF8: ptr) else {
+            kordLog.warning("Rust FFI returned invalid UTF-8 data")
+            kord_free_string(ptr)
+            return nil
+        }
         kord_free_string(ptr)
         return str
     }
@@ -45,7 +52,12 @@ final class KordCore {
     private func decodeRustJSON<T: Decodable>(_ ptr: UnsafeMutablePointer<CChar>?, as type: T.Type) -> T? {
         guard let json = consumeRustString(ptr),
               let data = json.data(using: .utf8) else { return nil }
-        return try? Self.decoder.decode(type, from: data)
+        do {
+            return try Self.decoder.decode(type, from: data)
+        } catch {
+            kordLog.warning("Failed to decode \(String(describing: type)) from Rust JSON: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     // MARK: - Settings

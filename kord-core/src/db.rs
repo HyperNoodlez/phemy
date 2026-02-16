@@ -5,6 +5,9 @@ use std::path::PathBuf;
 use std::sync::Mutex;
 use uuid::Uuid;
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
 pub struct Database {
     pub conn: Mutex<Connection>,
 }
@@ -56,6 +59,15 @@ pub fn init(db_path: &PathBuf) -> Result<()> {
     *db = Some(Database {
         conn: Mutex::new(conn),
     });
+
+    // Set restrictive permissions (owner-only read/write) on the database file
+    #[cfg(unix)]
+    {
+        let perms = std::fs::Permissions::from_mode(0o600);
+        if let Err(e) = std::fs::set_permissions(db_path, perms) {
+            log::warn!("Failed to set database file permissions: {}", e);
+        }
+    }
 
     log::info!("Database initialized at {:?}", db_path);
     Ok(())

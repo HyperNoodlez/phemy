@@ -7,8 +7,10 @@ use crate::settings::PasteMethod;
 /// Paste text into the currently focused application via clipboard.
 ///
 /// Strategy:
-/// 1. Set clipboard to our text via arboard
-/// 2. Simulate paste keystroke
+/// 1. Back up current clipboard contents
+/// 2. Set clipboard to our text via arboard
+/// 3. Simulate paste keystroke
+/// 4. Restore original clipboard contents (best-effort)
 pub fn paste_via_clipboard(
     text: &str,
     method: &PasteMethod,
@@ -17,9 +19,11 @@ pub fn paste_via_clipboard(
     // Small delay for focus to return to previous app
     std::thread::sleep(Duration::from_millis(delay_ms));
 
-    // Set clipboard using arboard
+    // Back up current clipboard contents (best-effort)
     let mut clipboard = arboard::Clipboard::new()
         .map_err(|e| anyhow::anyhow!("Failed to access clipboard: {}", e))?;
+    let previous_text = clipboard.get_text().ok();
+
     clipboard
         .set_text(text)
         .map_err(|e| anyhow::anyhow!("Failed to set clipboard text: {}", e))?;
@@ -37,6 +41,13 @@ pub fn paste_via_clipboard(
         _ => {
             simulate_paste(method)?;
         }
+    }
+
+    // Restore original clipboard contents after a short delay for paste to complete
+    if let Some(prev) = previous_text {
+        std::thread::sleep(Duration::from_millis(100));
+        // Best-effort restore — don't fail the paste if this doesn't work
+        let _ = clipboard.set_text(prev);
     }
 
     Ok(())

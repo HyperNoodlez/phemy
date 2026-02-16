@@ -1,5 +1,6 @@
 use anyhow::Result;
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 use std::sync::Mutex;
 
@@ -21,12 +22,13 @@ pub struct DownloadProgress {
 static DOWNLOAD_PROGRESS: std::sync::LazyLock<Mutex<Option<DownloadProgress>>> =
     std::sync::LazyLock::new(|| Mutex::new(None));
 
-const MODELS: &[(&str, &str, u64)] = &[
-    ("tiny", "ggml-tiny.bin", 75),
-    ("base", "ggml-base.bin", 142),
-    ("small", "ggml-small.bin", 466),
-    ("medium", "ggml-medium.bin", 1500),
-    ("large-v3", "ggml-large-v3.bin", 3100),
+/// (display_name, filename, size_mb, sha256_hex)
+const MODELS: &[(&str, &str, u64, &str)] = &[
+    ("tiny", "ggml-tiny.bin", 75, "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21"),
+    ("base", "ggml-base.bin", 142, "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe"),
+    ("small", "ggml-small.bin", 466, "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b"),
+    ("medium", "ggml-medium.bin", 1500, "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208"),
+    ("large-v3", "ggml-large-v3.bin", 3100, "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2"),
 ];
 
 const HF_BASE_URL: &str =
@@ -36,9 +38,15 @@ pub fn get_model_path(name: &str) -> Result<PathBuf> {
     let models_dir = crate::utils::models_dir()?;
     let filename = MODELS
         .iter()
-        .find(|(n, _, _)| *n == name)
-        .map(|(_, f, _)| *f)
+        .find(|(n, _, _, _)| *n == name)
+        .map(|(_, f, _, _)| *f)
         .ok_or_else(|| anyhow::anyhow!("Unknown whisper model: {}", name))?;
+
+    anyhow::ensure!(
+        !filename.contains("..") && !filename.contains('/'),
+        "Invalid model filename: {}",
+        filename
+    );
 
     Ok(models_dir.join(filename))
 }
@@ -48,7 +56,7 @@ pub fn list_models() -> Result<Vec<WhisperModel>> {
 
     Ok(MODELS
         .iter()
-        .map(|(name, filename, size_mb)| {
+        .map(|(name, filename, size_mb, _sha256)| {
             let path = models_dir.join(filename);
             WhisperModel {
                 name: name.to_string(),
@@ -60,9 +68,9 @@ pub fn list_models() -> Result<Vec<WhisperModel>> {
 }
 
 pub async fn download_model(name: &str) -> Result<()> {
-    let (_, filename, _) = MODELS
+    let (_, filename, _, expected_sha256) = MODELS
         .iter()
-        .find(|(n, _, _)| *n == name)
+        .find(|(n, _, _, _)| *n == name)
         .ok_or_else(|| anyhow::anyhow!("Unknown whisper model: {}", name))?;
 
     let url = format!("{}/{}", HF_BASE_URL, filename);
@@ -79,6 +87,7 @@ pub async fn download_model(name: &str) -> Result<()> {
 
     let total_bytes = response.content_length().unwrap_or(0);
     let mut downloaded_bytes: u64 = 0;
+    let mut hasher = Sha256::new();
 
     let mut file = tokio::fs::File::create(&dest).await?;
     let mut stream = response.bytes_stream();
@@ -89,6 +98,7 @@ pub async fn download_model(name: &str) -> Result<()> {
     while let Some(chunk) = stream.next().await {
         let chunk = chunk?;
         file.write_all(&chunk).await?;
+        hasher.update(&chunk);
         downloaded_bytes += chunk.len() as u64;
 
         let progress = if total_bytes > 0 {
@@ -114,7 +124,20 @@ pub async fn download_model(name: &str) -> Result<()> {
         *p = None;
     }
 
-    log::info!("Model '{}' downloaded to {:?}", name, dest);
+    // Verify SHA256 checksum
+    let actual_sha256 = format!("{:x}", hasher.finalize());
+    if actual_sha256 != *expected_sha256 {
+        // Remove the corrupted file
+        let _ = tokio::fs::remove_file(&dest).await;
+        anyhow::bail!(
+            "SHA256 mismatch for model '{}': expected {}, got {}",
+            name,
+            expected_sha256,
+            actual_sha256
+        );
+    }
+
+    log::info!("Model '{}' downloaded and verified (SHA256 OK) at {:?}", name, dest);
     Ok(())
 }
 
@@ -125,11 +148,14 @@ pub fn get_download_progress() -> Option<DownloadProgress> {
 /// Delete a downloaded whisper model by name.
 pub fn delete_model(name: &str) -> Result<()> {
     let path = get_model_path(name)?;
-    if path.exists() {
-        std::fs::remove_file(&path)?;
-        log::info!("Deleted whisper model '{}' at {:?}", name, path);
-    } else {
-        anyhow::bail!("Model '{}' is not downloaded", name);
+    match std::fs::remove_file(&path) {
+        Ok(_) => {
+            log::info!("Deleted whisper model '{}' at {:?}", name, path);
+            Ok(())
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            anyhow::bail!("Model '{}' is not downloaded", name)
+        }
+        Err(e) => Err(e.into()),
     }
-    Ok(())
 }

@@ -17,6 +17,9 @@ use ffi::{c_str_to_str, str_to_c_char, to_json_c_char};
 /// Tokio runtime for async operations
 static RUNTIME: OnceLock<tokio::runtime::Runtime> = OnceLock::new();
 
+/// Guard against double-initialization
+static INIT: OnceLock<bool> = OnceLock::new();
+
 fn runtime() -> &'static tokio::runtime::Runtime {
     RUNTIME.get_or_init(|| {
         tokio::runtime::Runtime::new().expect("Failed to create tokio runtime")
@@ -29,9 +32,16 @@ fn runtime() -> &'static tokio::runtime::Runtime {
 
 /// Initialize kord-core with a data directory path.
 /// Must be called before any other function.
+/// Returns true on success, true (no-op) on subsequent calls.
 #[no_mangle]
 pub extern "C" fn kord_init(data_dir: *const c_char) -> bool {
     let _ = env_logger::try_init();
+
+    // Prevent double-initialization
+    if INIT.get().is_some() {
+        log::debug!("kord_init called again — already initialized, skipping");
+        return true;
+    }
 
     let dir = match unsafe { c_str_to_str(data_dir) } {
         Some(s) => PathBuf::from(s),
@@ -46,7 +56,10 @@ pub extern "C" fn kord_init(data_dir: *const c_char) -> bool {
 
     let db_path = dir.join("kord.db");
     match db::init(&db_path) {
-        Ok(_) => true,
+        Ok(_) => {
+            let _ = INIT.set(true);
+            true
+        }
         Err(e) => {
             log::error!("Failed to initialize database: {}", e);
             false

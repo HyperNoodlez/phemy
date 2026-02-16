@@ -13,6 +13,7 @@
 /**
  * Initialize kord-core with a data directory path.
  * Must be called before any other function.
+ * Returns true on success, true (no-op) on subsequent calls.
  */
 bool kord_init(const char *data_dir);
 

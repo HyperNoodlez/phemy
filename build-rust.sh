@@ -13,6 +13,16 @@ export CXXFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/inclu
 cd "$RUST_DIR"
 
 # ===========================================================================
+# Optional: Audit Rust dependencies for known vulnerabilities
+# ===========================================================================
+if command -v cargo-audit &> /dev/null; then
+    echo "==> Running cargo audit..."
+    cargo audit --deny warnings || echo "WARNING: cargo audit found issues (see above)"
+else
+    echo "  (cargo audit not installed — run 'cargo install cargo-audit' for dependency security checks)"
+fi
+
+# ===========================================================================
 # Pass 1: Normal build — produces all rlibs including whisper-rs-sys
 # ===========================================================================
 cargo build --release

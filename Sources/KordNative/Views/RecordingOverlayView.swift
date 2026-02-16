@@ -104,10 +104,22 @@ struct RecordingOverlayView: View {
                 }
             }
 
-            Text("Enter = Paste  |  Esc = Dismiss")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
+            if manager.accessibilityDenied {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                        .font(.system(size: 10))
+                    Text("Keyboard shortcuts unavailable — grant Accessibility in System Settings")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.orange)
+                }
                 .frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                Text("Enter = Paste  |  Esc = Dismiss")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            }
         }
         .padding(16)
         .background(.ultraThinMaterial, in: shape)

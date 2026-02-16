@@ -2,6 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub enum PromptMode {
@@ -170,7 +173,17 @@ impl Settings {
     pub fn save(&self) -> anyhow::Result<()> {
         let path = settings_path()?;
         let json = serde_json::to_string_pretty(self)?;
-        std::fs::write(&path, json)?;
+        std::fs::write(&path, &json)?;
+
+        // Set restrictive permissions (owner-only read/write)
+        #[cfg(unix)]
+        {
+            let perms = std::fs::Permissions::from_mode(0o600);
+            if let Err(e) = std::fs::set_permissions(&path, perms) {
+                log::warn!("Failed to set settings file permissions: {}", e);
+            }
+        }
+
         Ok(())
     }
 }

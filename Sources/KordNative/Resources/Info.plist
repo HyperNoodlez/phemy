@@ -4,5 +4,9 @@
 <dict>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Kord needs microphone access to record your voice and transcribe it into text.</string>
+    <key>NSAccessibilityUsageDescription</key>
+    <string>Kord needs accessibility access to capture keyboard shortcuts and paste text into other applications.</string>
 </dict>
 </plist>

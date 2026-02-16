@@ -16,6 +16,8 @@ final class RecordingManager: ObservableObject {
     @Published var result: ProcessingResult?
     @Published var errorMessage: String?
     @Published var audioLevel: Float = 0
+    /// Set to true when CGEvent tap fails due to missing Accessibility permission
+    @Published var accessibilityDenied: Bool = false
 
     private let core = KordCore.shared
     private var audioLevelCancellable: AnyCancellable?
