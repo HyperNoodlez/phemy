@@ -41,77 +41,33 @@ The entire pipeline runs on-device. Your voice data never leaves your Mac.
 
 ---
 
-<h2 align="center">Getting Started</h2>
+## Getting Started
 
-<p align="center">Kord builds from source. Follow these steps in <strong>Terminal</strong> (open it from Applications → Utilities → Terminal).</p>
+### Prerequisites
 
-### Step 1 — Install the tools
-
-Run each of these commands one at a time. If any asks for your password, type it and press Enter (you won't see characters as you type — that's normal).
-
-**Xcode Command Line Tools** (compilers and system headers):
 ```bash
 xcode-select --install
-```
-> A popup will appear. Click **Install**, then wait for it to finish.
-
-**Homebrew** (package manager — skip if you already have it):
-```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-**cmake** (needed to compile the audio engine):
-```bash
 brew install cmake
-```
-
-**Rust** (the language Kord's core is written in):
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-> Press **1** when it asks, then restart Terminal so the `cargo` command is available.
-
-**cbindgen** (generates the bridge between Rust and Swift):
-```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh   # restart Terminal after
 cargo install cbindgen
 ```
 
-### Step 2 — Download and build Kord
+### Build & Run
 
 ```bash
 git clone https://github.com/HyperNoodlez/kord-for-macos.git
 cd kord-for-macos
-```
-
-Build the Rust core library (this compiles Whisper and llama.cpp from source — **the first build takes several minutes**, grab a coffee):
-
-```bash
-./build-rust.sh
-```
-
-Then build and launch the app:
-
-```bash
+./build-rust.sh    # first build takes several minutes
 swift run
 ```
 
-### Step 3 — Download the AI models
+### First Launch
 
-Kord needs two small AI models — one for listening, one for writing. These download inside the app with one click each.
-
-1. Kord appears in your **menu bar** (top-right of your screen) as a small swirl icon
-2. Click it → **Show Settings**
-3. Go to **Transcription** → click **Download** next to `base` (142 MB)
-4. Go to **LLM** → click **Download** next to your preferred model:
-   - `Qwen2.5 1.5B` (1 GB) — fastest, great for everyday use
-   - `Qwen3 4B` (2.7 GB) — best quality, still runs in ~2 seconds
-5. Once both models show a green checkmark, you're ready
-
-### Step 4 — Use it
-
-Press **`Alt+Space`** from any app. Speak. Press **Enter** to paste. That's it.
-
-> **Tip:** You can change the hotkey, prompt style, accent color, and more in Settings.
+1. Click the menu bar icon → **Show Settings**
+2. **Transcription** → download `base` (142 MB)
+3. **LLM** → download `Qwen2.5 1.5B` (1 GB, fastest) or `Qwen3 4B` (2.7 GB, best quality)
+4. Press **`Alt+Space`**, speak, press **Enter** to paste
 
 ---
 
