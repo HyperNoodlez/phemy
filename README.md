@@ -5,7 +5,7 @@
 <h1 align="center">Kord</h1>
 
 <p align="center">
-  <strong>Free, open-source, Fully Local AI voice dictation for macOS. The offline alternative to Wispr Flow, Willow, and Aqua Voice.</strong>
+  <strong>Free, open-source, fully local AI voice dictation for macOS. The offline alternative to Wispr Flow, Willow, and Aqua Voice.</strong>
 </p>
 
 <p align="center">
