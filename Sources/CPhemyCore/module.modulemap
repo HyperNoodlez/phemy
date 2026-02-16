@@ -1,0 +1,5 @@
+module CPhemyCore {
+    header "../../phemy-core/include/phemy_core.h"
+    link "phemy_core"
+    export *
+}

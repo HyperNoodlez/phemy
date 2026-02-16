@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="visual%20assets/App_Logo.png" alt="Kord — free open-source AI voice dictation for macOS" width="180" />
+  <img src="visual%20assets/App_Logo.png" alt="Phemy — free open-source AI voice dictation for macOS" width="180" />
 </p>
 
-<h1 align="center">Kord</h1>
+<h1 align="center">Phemy</h1>
 
 <p align="center">
   <strong>Free, open-source, fully local AI voice dictation for macOS. The offline alternative to Wispr Flow, Willow, and Aqua Voice.</strong>
@@ -19,17 +19,17 @@
 
 ---
 
-Kord is a **completely offline** macOS menu bar app that turns your voice into polished, LLM-optimized text. Press a hotkey, speak your thoughts, and Kord transcribes with local Whisper, refines with a local LLM, and pastes the result directly into whatever app you're using — no cloud, no API keys, no subscription, no data leaves your machine.
+Phemy is a **completely offline** macOS menu bar app that turns your voice into polished, LLM-optimized text. Press a hotkey, speak your thoughts, and Phemy transcribes with local Whisper, refines with a local LLM, and pastes the result directly into whatever app you're using — no cloud, no API keys, no subscription, no data leaves your machine.
 
 **Think of it as Wispr Flow or Willow, but free, open-source, and fully private.** No usage limits. No word caps. No account required. Everything runs on your Mac.
 
 ---
 
-## Why Kord?
+## Why Phemy?
 
-Most AI dictation tools charge $8–15/month and send your voice to the cloud. Kord does the same thing for free, forever, with zero network requests.
+Most AI dictation tools charge $8–15/month and send your voice to the cloud. Phemy does the same thing for free, forever, with zero network requests.
 
-| | Kord | Wispr Flow | Willow | Aqua Voice | SuperWhisper |
+| | Phemy | Wispr Flow | Willow | Aqua Voice | SuperWhisper |
 |---|:---:|:---:|:---:|:---:|:---:|
 | **Price** | **Free** | $12/mo | $12/mo | $8/mo | $5/mo |
 | **Open source** | **Yes** | No | No | No | No |
@@ -53,7 +53,7 @@ Most AI dictation tools charge $8–15/month and send your voice to the cloud. K
 
 1. **Press the hotkey** (default: `Alt+Space`) — a floating overlay appears
 2. **Speak naturally** — watch the audio-reactive ring respond to your voice
-3. **Release or press again** — Kord transcribes and optimizes your speech
+3. **Release or press again** — Phemy transcribes and optimizes your speech
 4. **Press Enter** — the polished text is pasted into the focused app
 
 The entire pipeline runs on-device. Your voice data never leaves your Mac.
@@ -75,8 +75,8 @@ cargo install cbindgen
 ### Build & Run
 
 ```bash
-git clone https://github.com/HyperNoodlez/kord-for-macos.git
-cd kord-for-macos
+git clone https://github.com/HyperNoodlez/phemy.git
+cd phemy
 ./build-rust.sh    # first build takes several minutes
 swift run
 ```
@@ -96,7 +96,7 @@ swift run
 Every component runs locally — Whisper for speech-to-text, a quantized Qwen LLM for text refinement. No internet connection required after model downloads. No telemetry. No analytics.
 
 ### Global Hotkey with Recording Overlay
-Trigger Kord from any app with a system-wide keyboard shortcut. The transparent floating overlay shows real-time audio visualization without stealing focus from your current window.
+Trigger Phemy from any app with a system-wide keyboard shortcut. The transparent floating overlay shows real-time audio visualization without stealing focus from your current window.
 
 - **Toggle mode** — press once to start, press again to stop
 - **Push-to-talk** — hold to record, release to stop
@@ -165,16 +165,16 @@ Q4_K_M quantized GGUF models from the [Qwen](https://huggingface.co/Qwen) family
 ## FAQ
 
 **How does this compare to macOS built-in Dictation?**
-Built-in Dictation gives you a raw transcript. Kord goes further — it cleans up filler words, fixes grammar, reformats for context (code, email, technical docs), and auto-pastes the result. It's voice-to-polished-text, not just voice-to-text.
+Built-in Dictation gives you a raw transcript. Phemy goes further — it cleans up filler words, fixes grammar, reformats for context (code, email, technical docs), and auto-pastes the result. It's voice-to-polished-text, not just voice-to-text.
 
 **Does it work with ChatGPT, Cursor, Slack, etc.?**
-Yes. Kord pastes into whatever app has focus. It works everywhere you can type — ChatGPT, Cursor, VS Code, Slack, Gmail, Notion, Terminal, or any other app.
+Yes. Phemy pastes into whatever app has focus. It works everywhere you can type — ChatGPT, Cursor, VS Code, Slack, Gmail, Notion, Terminal, or any other app.
 
 **How accurate is the transcription?**
-Kord uses OpenAI's Whisper models running locally. The `base` model is fast and accurate for everyday use. The `large-v3` model matches state-of-the-art cloud transcription accuracy.
+Phemy uses OpenAI's Whisper models running locally. The `base` model is fast and accurate for everyday use. The `large-v3` model matches state-of-the-art cloud transcription accuracy.
 
 **Does it work without internet?**
-Yes, 100%. After you download the models (one-time), Kord never makes a network request. Airplane mode, no Wi-Fi, air-gapped — it all works.
+Yes, 100%. After you download the models (one-time), Phemy never makes a network request. Airplane mode, no Wi-Fi, air-gapped — it all works.
 
 **What languages are supported?**
 Whisper supports 99 languages. Set the language code in Transcription settings (e.g., `en`, `es`, `fr`, `de`, `ja`, `zh`).

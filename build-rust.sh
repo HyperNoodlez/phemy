@@ -2,10 +2,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUST_DIR="$SCRIPT_DIR/kord-core"
+RUST_DIR="$SCRIPT_DIR/phemy-core"
 DEPS_DIR="$RUST_DIR/target/release/deps"
 
-echo "==> Building kord-core Rust library..."
+echo "==> Building phemy-core Rust library..."
 
 export PATH="$HOME/.cargo/bin:$PATH"
 export CXXFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1"
@@ -140,27 +140,27 @@ fi
 # Generate C header with cbindgen
 if command -v cbindgen &> /dev/null; then
     echo "==> Generating C header with cbindgen..."
-    cbindgen --config cbindgen.toml --crate kord-core --output include/kord_core.h
+    cbindgen --config cbindgen.toml --crate phemy-core --output include/phemy_core.h
 else
     echo "WARNING: cbindgen not installed. Run: cargo install cbindgen"
     echo "Using existing header if available."
 fi
 
 # Copy the dylib to project root
-DYLIB_PATH="$RUST_DIR/target/release/libkord_core.dylib"
+DYLIB_PATH="$RUST_DIR/target/release/libphemy_core.dylib"
 if [ -f "$DYLIB_PATH" ]; then
-    cp "$DYLIB_PATH" "$SCRIPT_DIR/libkord_core.dylib"
+    cp "$DYLIB_PATH" "$SCRIPT_DIR/libphemy_core.dylib"
 
     # Set the install name to absolute path for development.
-    install_name_tool -id "$SCRIPT_DIR/libkord_core.dylib" "$SCRIPT_DIR/libkord_core.dylib" 2>/dev/null \
-        && codesign -f -s - "$SCRIPT_DIR/libkord_core.dylib" 2>/dev/null \
+    install_name_tool -id "$SCRIPT_DIR/libphemy_core.dylib" "$SCRIPT_DIR/libphemy_core.dylib" 2>/dev/null \
+        && codesign -f -s - "$SCRIPT_DIR/libphemy_core.dylib" 2>/dev/null \
         || echo "  (install_name_tool skipped — using build path as install name)"
 
-    echo "==> Copied libkord_core.dylib to project root"
+    echo "==> Copied libphemy_core.dylib to project root"
 else
-    echo "ERROR: libkord_core.dylib not found at $DYLIB_PATH"
+    echo "ERROR: libphemy_core.dylib not found at $DYLIB_PATH"
     exit 1
 fi
 
-echo "==> Done! Library: $SCRIPT_DIR/libkord_core.dylib"
-echo "==> Header:  $RUST_DIR/include/kord_core.h"
+echo "==> Done! Library: $SCRIPT_DIR/libphemy_core.dylib"
+echo "==> Header:  $RUST_DIR/include/phemy_core.h"

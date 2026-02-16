@@ -3,10 +3,10 @@
 .swiftpm/
 
 # Rust
-kord-core/target/
+phemy-core/target/
 
 # Build outputs
-libkord_core.dylib
+libphemy_core.dylib
 
 # macOS
 .DS_Store
