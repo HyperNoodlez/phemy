@@ -1,0 +1,43 @@
+[package]
+name = "kord-core"
+version = "0.1.0"
+edition = "2021"
+description = "Kord core library - speech-to-LLM-prompt engine with C FFI"
+license = "MIT"
+authors = ["Lab.gargé"]
+repository = "https://github.com/labgarge/kord"
+
+[lib]
+name = "kord_core"
+crate-type = ["staticlib", "cdylib"]
+
+[features]
+default = ["whisper-local", "llm-local"]
+whisper-local = ["dep:whisper-rs"]
+llm-local = ["dep:llama-cpp-2"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+log = "0.4"
+env_logger = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+cpal = "0.15"
+rubato = "0.15"
+rustfft = "6"
+reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
+futures-util = "0.3"
+rusqlite = { version = "0.32", features = ["bundled"] }
+hound = "3.5"
+enigo = "0.2"
+arboard = "3"
+dirs = "5"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+whisper-rs = { version = "0.12", optional = true }
+llama-cpp-2 = { version = "0.1", features = ["metal"], optional = true }
+encoding_rs = "0.8"
+
+[build-dependencies]
+cbindgen = "0.27"

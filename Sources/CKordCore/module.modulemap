@@ -1,0 +1,5 @@
+module CKordCore {
+    header "../../kord-core/include/kord_core.h"
+    link "kord_core"
+    export *
+}

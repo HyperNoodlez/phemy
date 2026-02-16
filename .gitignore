@@ -1,0 +1,15 @@
+# Swift
+.build/
+.swiftpm/
+
+# Rust
+kord-core/target/
+
+# Build outputs
+libkord_core.dylib
+
+# macOS
+.DS_Store
+
+# Visual asset source files (keep PNGs, ignore Affinity source)
+visual assets/*.af
