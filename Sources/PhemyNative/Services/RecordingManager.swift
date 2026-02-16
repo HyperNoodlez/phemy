@@ -88,7 +88,9 @@ final class RecordingManager: ObservableObject {
         guard phase == .ready, let result = result else { return }
         let text = result.optimizedPrompt
         dismiss()  // Hide panel first so focus returns to target app
-        DispatchQueue.global(qos: .userInitiated).async {
+        // Small delay to let focus return to the target app, then paste on main thread
+        // (enigo's HIToolbox APIs require the main dispatch queue)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             _ = PhemyCore.shared.pasteText(text)
         }
     }

@@ -3,11 +3,10 @@ import SwiftUI
 /// SwiftUI view displayed inside the recording overlay panel.
 struct RecordingOverlayView: View {
     @ObservedObject var manager: RecordingManager
-    @AppStorage("appTheme") private var appThemeKey = AppTheme.system.rawValue
+    @AppStorage("appTheme") private var appThemeKey = AppTheme.dark.rawValue
 
     private var overlayColorScheme: ColorScheme? {
-        switch AppTheme(rawValue: appThemeKey) ?? .system {
-        case .system: return nil
+        switch AppTheme(rawValue: appThemeKey) ?? .dark {
         case .light:  return .light
         case .dark:   return .dark
         }

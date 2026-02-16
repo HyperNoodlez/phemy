@@ -67,7 +67,7 @@ enum HotkeyMode: String, CaseIterable, Identifiable, Codable {
 }
 
 enum AppTheme: String, CaseIterable, Identifiable, Codable {
-    case system, light, dark
+    case light, dark
 
     var id: String { rawValue }
     var displayName: String { rawValue.capitalized }
@@ -112,9 +112,9 @@ struct AppSettings: Codable {
         pasteMethod: .ctrlV,
         pasteDelayMs: 100,
         autoSubmit: false,
-        hotkey: "Alt+Space",
+        hotkey: "Ctrl+Space",
         hotkeyMode: .toggle,
-        theme: .system,
+        theme: .dark,
         launchAtStartup: false,
         vocabulary: []
     )

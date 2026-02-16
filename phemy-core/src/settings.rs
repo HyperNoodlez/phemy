@@ -55,14 +55,13 @@ impl Default for HotkeyMode {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub enum Theme {
-    System,
     Light,
     Dark,
 }
 
 impl Default for Theme {
     fn default() -> Self {
-        Self::System
+        Self::Dark
     }
 }
 
@@ -110,7 +109,7 @@ impl Default for Settings {
             paste_method: PasteMethod::default(),
             paste_delay_ms: 100,
             auto_submit: false,
-            hotkey: "Alt+Space".to_string(),
+            hotkey: "Ctrl+Space".to_string(),
             hotkey_mode: HotkeyMode::default(),
             theme: Theme::default(),
             launch_at_startup: false,

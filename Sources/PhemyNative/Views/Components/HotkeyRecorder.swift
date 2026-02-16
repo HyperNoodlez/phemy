@@ -43,7 +43,7 @@ struct HotkeyRecorder: View {
                 if parts.count >= 2 {
                     return parts.dropLast().joined(separator: "+")
                 }
-                return HotkeyModifier.alt.rawValue
+                return HotkeyModifier.ctrl.rawValue
             },
             set: { newMod in
                 let key = currentKey
@@ -69,7 +69,7 @@ struct HotkeyRecorder: View {
         if parts.count >= 2 {
             return parts.dropLast().joined(separator: "+")
         }
-        return HotkeyModifier.alt.rawValue
+        return HotkeyModifier.ctrl.rawValue
     }
 
     private var currentKey: String {
@@ -82,28 +82,20 @@ struct HotkeyRecorder: View {
 
 enum HotkeyModifier: String, CaseIterable, Identifiable {
     case ctrl = "Ctrl"
-    case alt = "Alt"
     case shift = "Shift"
     case superKey = "Super"
-    case ctrlAlt = "Ctrl+Alt"
     case ctrlShift = "Ctrl+Shift"
-    case altShift = "Alt+Shift"
     case superShift = "Super+Shift"
-    case ctrlAltShift = "Ctrl+Alt+Shift"
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
         case .ctrl:         return "\u{2303} Control"
-        case .alt:          return "\u{2325} Option"
         case .shift:        return "\u{21E7} Shift"
         case .superKey:     return "\u{2318} Command"
-        case .ctrlAlt:      return "\u{2303}\u{2325} Control+Option"
         case .ctrlShift:    return "\u{2303}\u{21E7} Control+Shift"
-        case .altShift:     return "\u{2325}\u{21E7} Option+Shift"
         case .superShift:   return "\u{2318}\u{21E7} Command+Shift"
-        case .ctrlAltShift: return "\u{2303}\u{2325}\u{21E7} Ctrl+Opt+Shift"
         }
     }
 }

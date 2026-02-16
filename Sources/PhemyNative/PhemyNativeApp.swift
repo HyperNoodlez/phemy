@@ -1,5 +1,8 @@
 import SwiftUI
 import Combine
+import os.log
+
+private let appLog = Logger(subsystem: "com.labgarge.phemy", category: "App")
 
 @main
 struct PhemyNativeApp: App {
@@ -31,7 +34,7 @@ struct PhemyNativeApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        Window("Phemy", id: "settings") {
             ContentView()
                 .environmentObject(theme)
                 .preferredColorScheme(theme.colorScheme)
@@ -76,6 +79,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsObserver: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Disable macOS window state restoration — prevents stale file-open dialogs
+        // when running as an unbundled executable
+        UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
+
         // Ensure app appears in Dock (MenuBarExtra can default to accessory mode)
         NSApp.setActivationPolicy(.regular)
 
@@ -121,6 +128,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let observer = settingsObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+    }
+
+    // MARK: - Suppress macOS File-Open Dialogs
+
+    /// Prevent macOS from trying to open an "untitled" file/window.
+    func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
+        appLog.warning("applicationShouldOpenUntitledFile called — returning false")
+        return false
+    }
+
+    /// Intercept file-open requests from macOS to suppress "file not found" dialogs.
+    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
+        appLog.warning("macOS requested openFile: \(filename) — suppressed")
+        return true
+    }
+
+    /// Intercept URL-open requests from macOS.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        appLog.warning("macOS requested open URLs: \(urls.map(\.absoluteString))")
+    }
+
+    /// Intercept any error presentation to suppress file-not-found dialogs from macOS/SwiftUI.
+    func application(_ application: NSApplication, willPresentError error: Error) -> Error {
+        let nsError = error as NSError
+        appLog.error("willPresentError: domain=\(nsError.domain) code=\(nsError.code) — \(nsError.localizedDescription)")
+        // Suppress file-not-found errors by converting to user-cancelled (which macOS silently ignores)
+        if nsError.domain == NSCocoaErrorDomain &&
+            (nsError.code == NSFileNoSuchFileError || nsError.code == NSFileReadNoSuchFileError) {
+            return NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError, userInfo: nil)
+        }
+        return error
+    }
+
+    /// Handle app re-activation (Dock click) — show settings window instead of default behavior.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            if let window = NSApplication.shared.windows.first {
+                window.makeKeyAndOrderFront(nil)
+            }
+        }
+        return true
     }
 
     // MARK: - Hotkey Configuration

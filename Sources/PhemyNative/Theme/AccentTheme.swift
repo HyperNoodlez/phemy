@@ -45,7 +45,7 @@ enum AccentPreset: String, CaseIterable, Identifiable {
 
 class ThemeManager: ObservableObject {
     @AppStorage("accentColor") var accentColorKey: String = AccentPreset.purple.rawValue
-    @AppStorage("appTheme") var appThemeKey: String = AppTheme.system.rawValue
+    @AppStorage("appTheme") var appThemeKey: String = AppTheme.dark.rawValue
 
     var current: AccentPreset {
         AccentPreset(rawValue: accentColorKey) ?? .purple
@@ -56,12 +56,11 @@ class ThemeManager: ObservableObject {
     var primaryDark: Color { current.primaryDark }
 
     var appTheme: AppTheme {
-        AppTheme(rawValue: appThemeKey) ?? .system
+        AppTheme(rawValue: appThemeKey) ?? .dark
     }
 
     var colorScheme: ColorScheme? {
         switch appTheme {
-        case .system: return nil
         case .light:  return .light
         case .dark:   return .dark
         }
