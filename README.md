@@ -62,7 +62,18 @@ The entire pipeline runs on-device. Your voice data never leaves your Mac.
 
 ## Getting Started
 
-### Prerequisites
+### Install (recommended)
+
+1. Download `Phemy.dmg` from the [latest release](https://github.com/HyperNoodlez/phemy/releases/latest)
+2. Open the DMG and drag `Phemy.app` to `/Applications`
+3. Launch Phemy from your Applications folder
+4. macOS may show "app from an unidentified developer" — right-click → **Open** to bypass
+
+> Requires macOS 14+ on Apple Silicon.
+
+### Build from Source
+
+#### Prerequisites
 
 ```bash
 xcode-select --install
@@ -72,7 +83,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh   # restart Termi
 cargo install cbindgen
 ```
 
-### Build & Run
+#### Build & Run
 
 ```bash
 git clone https://github.com/HyperNoodlez/phemy.git
@@ -81,7 +92,7 @@ cd phemy
 swift run
 ```
 
-### First Launch
+#### First Launch
 
 1. Click the menu bar icon → **Show Settings**
 2. **Transcription** → download `base` (142 MB)
