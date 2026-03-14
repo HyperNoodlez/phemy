@@ -84,7 +84,13 @@ cp "$DYLIB" "$APP_DIR/Contents/Frameworks/libphemy_core.dylib"
 RESOURCE_BUNDLE="$PROJECT_DIR/.build/arm64-apple-macosx/release/PhemyNative_PhemyNative.bundle"
 if [ -d "$RESOURCE_BUNDLE" ]; then
     cp -R "$RESOURCE_BUNDLE" "$APP_DIR/Contents/Resources/PhemyNative_PhemyNative.bundle"
-    echo "  Copied SPM resource bundle"
+    # SwiftPM's generated resource_bundle_accessor may incorrectly probe the app root
+    # before falling back to the build directory. Add a compatibility symlink at the
+    # app bundle root so release builds can still resolve Bundle.module after packaging.
+    if [ ! -e "$APP_DIR/PhemyNative_PhemyNative.bundle" ]; then
+        ln -s "Contents/Resources/PhemyNative_PhemyNative.bundle" "$APP_DIR/PhemyNative_PhemyNative.bundle"
+    fi
+    echo "  Copied SPM resource bundle and ensured app-root compatibility symlink"
 else
     echo "WARNING: SPM resource bundle not found at $RESOURCE_BUNDLE"
 fi
