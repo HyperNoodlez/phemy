@@ -16,9 +16,8 @@ let package = Package(
             name: "PhemyNative",
             dependencies: ["CPhemyCore"],
             path: "Sources/PhemyNative",
-            resources: [
-                .copy("Resources")
-            ],
+            // Resources loaded via custom BundleAccessor.swift (not SwiftPM auto-bundling)
+            exclude: ["Resources"],
             linkerSettings: [
                 .unsafeFlags([
                     "-L", ".",  // libphemy_core.dylib in project root

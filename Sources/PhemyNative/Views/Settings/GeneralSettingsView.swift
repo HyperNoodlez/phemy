@@ -3,6 +3,7 @@ import SwiftUI
 struct GeneralSettingsView: View {
     @ObservedObject var vm: SettingsViewModel
     @EnvironmentObject var theme: ThemeManager
+    @AppStorage("hideFromDockOnClose") private var hideFromDockOnClose = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sectionGap) {
@@ -59,6 +60,9 @@ struct GeneralSettingsView: View {
                     .toggleStyle(.switch)
                     .tint(theme.primary)
                     .onChange(of: vm.settings.launchAtStartup) { vm.autoSave() }
+                Toggle("Hide from Dock on close", isOn: $hideFromDockOnClose)
+                    .toggleStyle(.switch)
+                    .tint(theme.primary)
             }
 
             // Reset

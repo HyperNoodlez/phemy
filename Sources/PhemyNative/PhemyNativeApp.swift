@@ -14,8 +14,8 @@ struct PhemyNativeApp: App {
         guard let url = Bundle.module.url(forResource: "MenuBarIcon", withExtension: "png"),
               let image = NSImage(contentsOf: url) else { return nil }
         image.isTemplate = true
-        // 44px source is @2x — set point size to 22 so it renders at correct menu bar size
-        image.size = NSSize(width: 22, height: 22)
+        // 44px source is @2x — set point size to 18 for standard menu bar icon size
+        image.size = NSSize(width: 18, height: 18)
         return image
     }()
 
@@ -27,10 +27,6 @@ struct PhemyNativeApp: App {
     }()
 
     init() {
-        // Set applicationIconImage early for About dialogs and window icons
-        if let icon = Self.appIcon {
-            NSApplication.shared.applicationIconImage = icon
-        }
     }
 
     var body: some Scene {
@@ -48,9 +44,12 @@ struct PhemyNativeApp: App {
 
         MenuBarExtra {
             Button("Show Settings") {
-                NSApplication.shared.activate(ignoringOtherApps: true)
-                if let window = NSApplication.shared.windows.first {
-                    window.makeKeyAndOrderFront(nil)
+                NSApp.setActivationPolicy(.regular)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    NSApplication.shared.activate(ignoringOtherApps: true)
+                    if let window = NSApplication.shared.windows.first {
+                        window.makeKeyAndOrderFront(nil)
+                    }
                 }
             }
             .keyboardShortcut(",", modifiers: .command)
@@ -83,19 +82,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // when running as an unbundled executable
         UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
 
-        // Ensure app appears in Dock (MenuBarExtra can default to accessory mode)
+        // Default: don't hide from dock on close
+        if UserDefaults.standard.object(forKey: "hideFromDockOnClose") == nil {
+            UserDefaults.standard.set(false, forKey: "hideFromDockOnClose")
+        }
+
+        // Show in Dock on launch
         NSApp.setActivationPolicy(.regular)
 
-        // Set custom Dock tile icon (unbundled executables need explicit Dock tile update)
-        if let icon = PhemyNativeApp.appIcon {
-            NSApp.applicationIconImage = icon
-            let dockTile = NSApp.dockTile
-            let imageView = NSImageView(frame: NSRect(x: 0, y: 0, width: dockTile.size.width, height: dockTile.size.height))
-            imageView.image = icon
-            imageView.imageScaling = .scaleProportionallyUpOrDown
-            dockTile.contentView = imageView
-            dockTile.display()
-        }
+        // Dock icon handled by CFBundleIconFile in Info.plist
 
         overlayPanel = RecordingOverlayPanel(recordingManager: recordingManager)
 
@@ -161,7 +156,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return error
     }
 
-    /// Handle app re-activation (Dock click) — show settings window instead of default behavior.
+    /// When last window closes: if "hide from dock on close" is on, hide from Dock but stay in menu bar
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        let hideOnClose = UserDefaults.standard.bool(forKey: "hideFromDockOnClose")
+        if hideOnClose {
+            DispatchQueue.main.async {
+                NSApp.setActivationPolicy(.accessory)
+            }
+        }
+        return false
+    }
+
+    /// Handle app re-activation (Dock click) — show settings window.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             if let window = NSApplication.shared.windows.first {
